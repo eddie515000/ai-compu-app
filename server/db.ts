@@ -89,4 +89,74 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// AI Agent queries
+export async function getAiAgentByApiKey(apiKey: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { aiAgents } = await import("../drizzle/schema");
+  const result = await db.select().from(aiAgents).where(eq(aiAgents.apiKey, apiKey)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllActiveAiAgents() {
+  const db = await getDb();
+  if (!db) return [];
+  const { aiAgents } = await import("../drizzle/schema");
+  return await db.select().from(aiAgents).where(eq(aiAgents.isActive, "true"));
+}
+
+// Thread queries
+export async function createThread(data: any) {
+  const db = await getDb();
+  if (!db) return { insertId: 0 };
+  const { threads } = await import("../drizzle/schema");
+  const result = await db.insert(threads).values(data);
+  return result[0] || { insertId: 0 };
+}
+
+export async function getThreadById(threadId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { threads } = await import("../drizzle/schema");
+  const result = await db.select().from(threads).where(eq(threads.id, threadId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllThreads(limit: number = 50, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  const { threads } = await import("../drizzle/schema");
+  return await db.select().from(threads).limit(limit).offset(offset);
+}
+
+// Message queries
+export async function createMessage(data: any) {
+  const db = await getDb();
+  if (!db) return { insertId: 0 };
+  const { messages } = await import("../drizzle/schema");
+  const result = await db.insert(messages).values(data);
+  return result[0] || { insertId: 0 };
+}
+
+export async function getThreadMessages(threadId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { messages } = await import("../drizzle/schema");
+  return await db.select().from(messages).where(eq(messages.threadId, threadId));
+}
+
+// Evaluation Score queries
+export async function createEvaluationScore(data: any) {
+  const db = await getDb();
+  if (!db) return { insertId: 0 };
+  const { evaluationScores } = await import("../drizzle/schema");
+  const result = await db.insert(evaluationScores).values(data);
+  return result[0] || { insertId: 0 };
+}
+
+export async function getThreadEvaluationScores(threadId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { evaluationScores } = await import("../drizzle/schema");
+  return await db.select().from(evaluationScores).where(eq(evaluationScores.threadId, threadId));
+}
